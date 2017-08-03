@@ -35,5 +35,27 @@ end macro
 
 postpone
     db DEX_FILE_MAGIC?
+    dd $00 ; adler32 checksum
+    dd $14 dup $00 ; sha1
+    dd $00 ; file_size
+    dd $70 ; header_size
+    dd ENDIAN_CONSTANT ; endian_tag
+    dd $00 ; link_size
+    dd $00 ; link_off
+    dd $00 ; map_off
+    dd $00 ; string_ids_size
+    dd $00 ; string_ids_off
+    dd $00 ; type_ids_size
+    dd $00 ; type_ids_off
+    dd $00 ; proto_ids_size
+    dd $00 ; proto_ids_off
+    dd $00 ; field_ids_size
+    dd $00 ; field_ids_off
+    dd $00 ; method_ids_size
+    dd $00 ; method_ids_off
+    dd $00 ; class_defs_size
+    dd $00 ; class_defs_off
+    dd $00 ; data_size
+    dd $00 ; data_off
 end postpone
 

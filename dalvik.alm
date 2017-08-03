@@ -44,11 +44,6 @@ match _, __prefix
         end calminstruction
         purge calminstruction?.token?
 
-        _1 format abc-wide?
-        match __1, _1
-            ;display `__1, $0A
-        end match
-
         element register?
         threshold_04? := $00010
         threshold_08? := $00100

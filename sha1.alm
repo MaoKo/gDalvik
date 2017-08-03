@@ -1,0 +1,20 @@
+
+calminstruction (return?) sha1? virtual?*, size?*
+;        local       data, index, a, b, c, d, e
+;        declconst   _data, data
+;        declconst   h0, $67452301
+;        declconst   h1, $EFCDAB89
+;        declconst   h2, $98BADCFE
+;        declconst   h3, $10325476
+;        declconst   h4, $C3D2E1F0
+;        compute     index, $00
+;        compute     size, ((size) / $40)
+;    loop:
+;        check       (index < size)
+;        jyes        load
+;        exit
+;    load:
+;        asmcmd      invoke, =load _data:$40 =from virtual:()
+;        compute     index, (index + $01)
+;        jump        loop
+end calminstruction

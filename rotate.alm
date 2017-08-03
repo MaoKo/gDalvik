@@ -1,0 +1,57 @@
+
+calminstruction (return?) rotate? size?*, expression?*, amount?*
+        local       target, select, bitmask, right
+        compute     expression, expression
+        compute     size, size
+        check       (size < $00)
+        jyes        leave
+        compute     select, (($01 shl size) - $01)
+        compute     right, $00
+        compute     amount, amount
+        check       (amount < $00)
+        jno         continue
+        compute     amount, (amount * -$01)
+        compute     right, $01
+    continue:
+        compute     amount, (amount mod size)
+        check       (~amount)
+        jyes        leave
+        check       (right)
+        jyes        right
+        compute     bitmask, ((((($01 shl amount) - $01) shl amount) and expression) shr amount)
+        compute     target, (((expression shl amount) and select) or bitmask)
+        jump        insert
+    right:
+        compute     bitmask, ((($01 shl amount) - $01) and expression)
+        compute     target, (((expression and select) shr amount) or (bitmask shl amount))
+    insert:
+        compute     select, (not select)
+        compute     expression, ((expression and select) or target)
+    leave:
+        publish     return, expression
+        exit
+end calminstruction
+
+iterate <instruction?*>,ror,rol
+    macro calminstruction?.builder?
+        declconst   _size, size
+        declconst   _expression, expression
+        declconst   _amount, amount
+    end macro
+    match =ror?, instruction
+        macro calminstruction?.builder?
+            builder
+            compute amount, (-amount)
+        end macro
+    end match
+    macro calminstruction?.builder?
+        builder
+        asmcmd  invoke, return =rotate _size, _expression, _amount
+    end macro
+    calminstruction (return?) instruction? size?*, expression?*, amount?*
+        builder
+    end calminstruction
+    repeat $03
+        purge calminstruction?.builder?
+    end repeat
+end iterate
