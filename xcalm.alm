@@ -1,37 +1,38 @@
 
 calminstruction calminstruction?.initsym? target?*, value?&
-	publish		target, value
+        publish     target, value
 end calminstruction
 
 calminstruction calminstruction?.initvar? target?*, value?:$00
-	compute		value, value
-	publish		target, value
+        compute     value, value
+        publish     target, value
 end calminstruction
 
 redefine __prefix? __
 match _, __prefix
-	iterate <prefix?>,,calminstruction?.
-		calminstruction prefix#unique? target?*
-			local		count, build
-			initvar		count
-			arrange		build, =_#target#count
-			compute		count, count + $01
-			publish		target, build
-		end calminstruction
-	end iterate
-	restore __prefix?
+    iterate <prefix?>,,calminstruction?.
+        calminstruction prefix#unique? target?*
+                local       count, build
+                initvar     count
+                arrange     build, =_#target#count
+                compute     count, count + $01
+                publish     target, build
+        end calminstruction
+    end iterate
+    restore __prefix?
 end match
 
 iterate <prefix?>,,calminstruction?.
-	calminstruction prefix#declconst? target?*, source?&
-		publish		target:, source
-	end calminstruction
+    calminstruction prefix#declconst? target?*, source?&
+            publish     target:, source
+    end calminstruction
 end iterate
 
 calminstruction calminstruction?.execasm? instruction?&	
-	local		random
-	declconst	_random, random
-	asmcmd		invoke, =unique _random
-	publish		random:, instruction 
-	asmcmd		invoke, =assemble random
+        local       random
+        declconst   _random, random
+        asmcmd      invoke, =unique _random
+        publish     random:, instruction 
+        asmcmd      invoke, =assemble random
 end calminstruction
+

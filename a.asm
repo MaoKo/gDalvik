@@ -7,7 +7,7 @@ include "dalvik.alm"
 include "dex.alm"
 
 _start:
-	move/from16 v0, v65000
-	return v0
+    ;move/from16 v0, v65000
+    return v0
 
 
