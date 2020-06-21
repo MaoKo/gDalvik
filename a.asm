@@ -1,13 +1,9 @@
 
-include "asmcmd.inc"
-include "xcalm.alm"
-include "ensure.alm"
-include "identifier.inc"
-include "dalvik.alm"
-include "dex.alm"
+include "gdalvik.inc"
 
 _start:
-    ;move/from16 v0, v65000
+    nop
+    move v3, v6
     return v0
 
 
