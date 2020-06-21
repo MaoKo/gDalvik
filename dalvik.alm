@@ -1,0 +1,102 @@
+
+dalvik? := $01
+
+redefine __prefix? #
+match _, __prefix
+	namespace dalvik?
+		element register?
+		_THRESHOLD_01? := $00010
+		_THRESHOLD_02? := $00100
+		_THRESHOLD_03? := $10000
+
+		repeat _THRESHOLD_03, i:$00
+			element _#v#i? : register + i
+		end repeat
+
+		calminstruction calminstruction?.threshold? target?*, threshold?*
+			local		random
+			asmcmd		invoke, =compute target, (((target) =metadata $01) - =dalvik?.=register?)
+			asmcmd		invoke, =check (target < threshold)
+			execasm		unique random
+			asmcmd		invoke, =jyes random
+			execasm		execasm err ""
+			asmcmd		invoke, random:
+		end calminstruction
+
+		calminstruction nop?
+			execasm		dw ($00)
+		end calminstruction
+
+		calminstruction move? vA?*, vB?*
+			ensure		,register?, vA, vB
+			threshold	vA, _THRESHOLD_01?
+			threshold	vB, _THRESHOLD_01?
+			execasm		dw ((((vB shl $04) or vA) shl $08) or $01)
+		end calminstruction
+
+		calminstruction __move@from16? vAA?*, vBBBB?*
+			ensure		,register?, vAA, vBBBB
+			threshold	vAA, _THRESHOLD_02?
+			threshold	vBBBB, _THRESHOLD_03?
+			execasm		dd ((vBBBB shl $10) or (vAA shl $08) or $02)
+		end calminstruction
+
+		calminstruction __move@16? vAAAA?*, vBBBB?*
+			ensure		,register?, vAAAA, vBBBB
+			threshold	vAAAA, _THRESHOLD_03?
+			threshold	vBBBB, _THRESHOLD_03?
+			execasm		dw $02
+			execasm		dd ((vBBBB shl $10) or (vAAAA))
+		end calminstruction
+
+		calminstruction __move$wide? vA?*, vB?*
+		end calminstruction
+
+		calminstruction __return$void?	
+			execasm		dw ($0E)
+		end calminstruction
+
+		calminstruction return? vAA?*
+			ensure		,register?, vAA
+			threshold	vAA, _THRESHOLD_02?
+			execasm		dw ((vAA shl $08) or ($0F))
+		end calminstruction
+
+		purge calminstruction?.threshold?
+	end namespace
+	restore __prefix?
+end match
+
+iterate <global?*>, nop?, move?, return?
+	mvmacro global, dalvik?.global
+end iterate
+
+calminstruction ?! line?&
+	local		instruction, remain, build, symbol, result_1, result_2
+	declconst	_result_1, result_1
+	declconst	_result_2, result_2
+	match		instruction= remain?, line
+	jno		normal
+	arrange		build, =dalvik?.=__
+prefix:
+	match		symbol-instruction, instruction
+	jno		suffix
+	asmcmd		invoke, _result_1 =identifier symbol
+	check		(result_1 = TOKEN?)
+	jyes		normal
+	arrange		build, build#symbol#$
+	jump		prefix
+suffix:
+	match		symbol/instruction, instruction
+	jno		finish
+	asmcmd		invoke, _result_1 =identifier symbol
+	asmcmd		invoke, _result_2 =identifier instruction
+	check		(result_1 = TOKEN?) | (result_2 = TOKEN?)
+	jyes		normal
+	arrange		build, build#symbol#=@#instruction
+	arrange		line, build remain
+finish:
+normal:
+	asmcmd		invoke, line
+end calminstruction
+

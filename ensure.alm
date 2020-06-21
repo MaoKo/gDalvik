@@ -1,0 +1,29 @@
+
+calminstruction calminstruction?.ensure? feedback?, target?*, sources?*&
+	local		empty, source, label
+	compute		empty, $01
+	match		feedback, feedback
+	jno		continue
+	asmcmd		invoke, =compute feedback, $00
+	compute		empty, $00
+continue:
+	arrange		sources, sources,
+loop:
+	match		source =, sources?, sources
+	jyes		init
+	exit
+init:
+	asmcmd		invoke, =compute source, source
+	asmcmd		invoke, =check (~(((source) =metadata $01 =relativeto (target)) & ((source) =element $01 =eq (source))))
+	execasm		unique label
+	asmcmd		invoke, =jno label
+	check		(empty)
+	jno		reset
+	execasm		execasm err "TODO"
+	jump		declare
+reset:
+	asmcmd		invoke, =compute feedback, $01
+declare:
+	asmcmd		invoke, label:
+	jump		loop
+end calminstruction
