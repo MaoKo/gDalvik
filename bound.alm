@@ -1,0 +1,10 @@
+
+calminstruction calminstruction?.bound? value?*, bitness?*
+        local       ulimit, slimit, random
+        asmcmd      invoke, =compute value, value
+        compute     bitness, bitness
+        compute     ulimit, ($01 shl bitness)
+        compute     slimit, ($01 shl (bitness - $01))
+        asmcmd      invoke, =check ((value < -slimit) | (value >== 16))
+        error       unique, "bound failed"
+end calminstruction

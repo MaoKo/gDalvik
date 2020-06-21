@@ -58,14 +58,18 @@ match _, __prefix
             element _#v#i? : register + i
         end repeat
 
-        calminstruction calminstruction?.threshold? target?*, threshold?*
-                local       random
+        calminstruction calminstruction?.threshold? threshold?*, targets?*&
+                local       target, random
+                arrange     targets, targets,
+            loop:
+                match       target =, targets?, targets
+                jyes        init
+                exit
+            init:
                 asmcmd      invoke, =compute target, (((target) =metadata $01) - =dalvik?.=register?)
-                asmcmd      invoke, =check (target < threshold)
-                execasm     unique random
-                asmcmd      invoke, =jyes random
-                execasm	    execasm err ""
-                asmcmd      invoke, random:
+                asmcmd      invoke, =check (target >= threshold)
+                error       random, "threshold failed"
+                jump        loop
 		end calminstruction
 
         calminstruction calminstruction? line?*&
@@ -86,21 +90,19 @@ match _, __prefix
 
         iterate <suffix?>,,-wide,-object
             calminstruction move#suffix? vA?*, vB?*
-                    ensure      ,register?, vA, vB
-                    threshold   vA, threshold_04?
-                    threshold   vB, threshold_04?
+                    ensure      register?, vA, vB
+                    threshold   threshold_04?, vA, vB
                     execasm     dw ((((vB shl $04) or vA) shl $08) or ($01 + ((% - $01) * $03)))
             end calminstruction
             calminstruction move#suffix/from16? vAA?*, vBBBB?*
-                    ensure      ,register?, vAA, vBBBB
-                    threshold   vAA, threshold_08?
-                    threshold   vBBBB, threshold_16?
+                    ensure      register?, vAA, vBBBB
+                    threshold   threshold_08?, vAA
+                    threshold   threshold_16?, vBBBB
                     execasm     dd ((vBBBB shl $10) or (vAA shl $08) or ($02 + ((% - $01) * $03)))
             end calminstruction
             calminstruction move/16? vAAAA?*, vBBBB?*
-                    ensure      ,register?, vAAAA, vBBBB
-                    threshold   vAAAA, threshold_16?
-                    threshold   vBBBB, threshold_16?
+                    ensure      register?, vAAAA, vBBBB
+                    threshold   threshold_16?, vAAAA, vBBBB
                     execasm     dw ($03 + ((% - $01) * $03))
                     execasm     dd ((vBBBB shl $10) or (vAAAA))
             end calminstruction
@@ -108,15 +110,15 @@ match _, __prefix
 
         iterate <suffix?*>,-result,-exception
             calminstruction move#suffix? vAA?*
-                    ensure      ,register?, vAA
-                    threshold   vAA, threshold_08?
+                    ensure      register?, vAA
+                    threshold   threshold_08?, vAA
                     execasm     dw ((vAA shl $08) or ($0A + ((% - $01) * $03)))
             end calminstruction
             if ((%) = $01)
                 iterate <kind?*>,-wide,-object
                     calminstruction move#suffix#kind? vAA?*
-                            ensure      ,register?, vAA
-                            threshold   vAA, threshold_08?
+                            ensure      register?, vAA
+                            threshold   threshold_08?, vAA
                             execasm     dw ((vAA shl $08) or ($0B + (% - $01)))
                     end calminstruction
                 end iterate
@@ -129,29 +131,32 @@ match _, __prefix
 
         iterate <suffix?>,,-wide,-object
             calminstruction return#suffix? vAA?*
-                    ensure      ,register?, vAA
-                    threshold   vAA, threshold_08?
+                    ensure      register?, vAA
+                    threshold   threshold_08?, vAA
                     execasm     dw ((vAA shl $08) or ($0F + (% - $01)))
             end calminstruction
         end iterate
 
-        calminstruction const/4? vA?*, B?*
+        calminstruction const? vA?*, B?*
+                ensure      register?, vA
+                threshold   threshold_04?, vA
+                bound       B, $04
+                execasm     dd ((((B shl $04) or vA) shl $10) or ($12))
         end calminstruction
 
         iterate <suffix?*>,-enter,-exit
             calminstruction monitor#suffix? vAA?*
-                    ensure      ,register?, vAA
-                    threshold   vAA, threshold_08?
+                    ensure      register?, vAA
+                    threshold   threshold_08?, vAA
                     execasm     dw ((vAA shl $08) or ($1D + (% - $01)))
             end calminstruction
         end iterate
-
         purge calminstruction?.threshold?, calminstruction?
     end namespace
     restore __prefix?
 end match
 
-iterate <global?*>, nop?, move?, return?
+iterate <global?*>, nop?, move?, return?, const?
     mvmacro global, dalvik?.global
 end iterate
 
