@@ -7,5 +7,6 @@ include "bound.alm"
 include "identifier.inc"
 include "dalvik.alm"
 include "leb128.alm"
+include "adler32.alm"
 include "dex.alm"
 

@@ -27,6 +27,12 @@ ACC_ENUM?                  := $004000
 ACC_CONSTRUCTOR?           := $010000
 ACC_DECLARED_SYNCHRONIZED? := $020000
 
+macro string_ids?
+    struc string? string?*
+        . = string
+    end struc
+end macro
+
 postpone
     db DEX_FILE_MAGIC?
 end postpone
