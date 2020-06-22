@@ -1,10 +1,32 @@
 
-calminstruction calminstruction?.bound? value?*, bitness?*
+__bound? := $00
+namespace __bound?
+     unsigned? := $00
+       signed? := $01
+    arbitrary? := $02
+end namespace
+
+calminstruction calminstruction?.bound? value?*, bitness?*, kind?*
         local       ulimit, slimit, random
+        declconst   base, __bound?
+        arrange     kind, base.kind
+        compute     kind, kind
         asmcmd      invoke, =compute value, value
         compute     bitness, bitness
         compute     ulimit, ($01 shl bitness)
         compute     slimit, ($01 shl (bitness - $01))
-        asmcmd      invoke, =check ((value < -slimit) | (value >== 16))
+        check       (kind = __bound?.unsigned?)
+        jyes        unsigned
+        check       (kind = __bound?.signed?)
+        jyes        signed
+        asmcmd      invoke, =check ((value < (-slimit)) | (value >== ulimit))
+        jump        final
+    unsigned:
+        asmcmd      invoke, =check ((value < $00) | (value >== ulimit))
+        jump        final
+    signed:
+        asmcmd      invoke, =check ((value < (-slimit)) | (value >== slimit))
+    final:
         error       unique, "bound failed"
 end calminstruction
+

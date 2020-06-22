@@ -46,7 +46,7 @@ match _, __prefix
 
         _1 format abc-wide?
         match __1, _1
-            display `__1, $0A
+            ;display `__1, $0A
         end match
 
         element register?
@@ -137,11 +137,24 @@ match _, __prefix
             end calminstruction
         end iterate
 
-        calminstruction const? vA?*, B?*
+        calminstruction const_4? vA?*, B?*
                 ensure      register?, vA
                 threshold   threshold_04?, vA
-                bound       B, $04
-                execasm     dd ((((B shl $04) or vA) shl $10) or ($12))
+                bound       B, $04, signed
+                execasm     dw ((((B shl $04) or vA) shl $08) or ($12))
+        end calminstruction
+
+        calminstruction const_16? vAA?*, BBBB?*
+                ensure      register?, vAA
+                threshold   threshold_08?, vAA
+                bound       BBBB, $10, signed
+                execasm     dd ((BBBB shl $10) or ((vAA shl $08) or $13))
+        end calminstruction
+
+        calminstruction const? vAA?*, BBBBBBBB?*
+                ensure      register?, vAA
+                threshold   threshold_08?, vAA
+                bound       BBBBBBBB, $20, arbitrary
         end calminstruction
 
         iterate <suffix?*>,-enter,-exit
@@ -156,7 +169,7 @@ match _, __prefix
     restore __prefix?
 end match
 
-iterate <global?*>, nop?, move?, return?, const?
+iterate <global?*>, nop?, move?, return?, const_4?, const_16?, const?
     mvmacro global, dalvik?.global
 end iterate
 
