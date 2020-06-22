@@ -1,0 +1,22 @@
+
+calminstruction leb128? values?*&
+        local       value, least
+        arrange     values, values, 
+    loop:
+        match       value =, values?, values
+        jyes        init
+        exit
+    init:
+        compute     value, value
+    positive:
+        compute     least, (value and $7F)
+        compute     value, (value shr $07)
+        check       ((value = $00) | ((value = -$01) & (least <> $00)))
+        jyes        define
+        execasm     db (least or $80)
+        jump        positive
+    define:
+        execasm     db (least)
+        jump        loop
+end calminstruction
+

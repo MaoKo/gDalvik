@@ -6,5 +6,6 @@ include "ensure.alm"
 include "bound.alm"
 include "identifier.inc"
 include "dalvik.alm"
+include "leb128.alm"
 include "dex.alm"
 

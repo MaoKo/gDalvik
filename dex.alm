@@ -1,25 +1,33 @@
 
-DEX_FILE_MAGIC? := $00
+format binary as "dex"
 
-calminstruction leb128? values?*&
-        local       value, least
-        arrange     values, values, 
-    loop:
-        match       value =, values?, values
-        jyes        init
-        exit
-    init:
-        compute     value, value
-    positive:
-        compute     least, (value and $7F)
-        compute     value, (value shr $07)
-        check       ((value = $00) | ((value = -$01) & (least <> $00)))
-        jyes        define
-        execasm     db (least or $80)
-        jump        positive
-    define:
-        execasm     db (least)
-        jump        loop
-end calminstruction
+DEX_FILE_MAGIC? := ($6465780A30333900 bswap $08)
 
+ENDIAN_CONSTANT? := $12345678
+REVERSE_ENDIAN_CONSTANT? := $78563412
+NO_INDEX? := -$01
+
+ACC_PUBLIC?                := $000001
+ACC_PRIVATE?               := $000002
+ACC_PROTECTED?             := $000004
+ACC_STATIC?                := $000008
+ACC_FINAL?                 := $000010
+ACC_SYNCHRONIZED?          := $000020
+ACC_VOLATILE?              := $000040
+ACC_BRIDGE?                := $000040
+ACC_TRANSIENT?             := $000080
+ACC_VARARGS?               := $000080
+ACC_NATIVE?                := $000100
+ACC_INTERFACE?             := $000200
+ACC_ABSTRACT?              := $000400
+ACC_STRICT?                := $000800
+ACC_SYNTHETIC?             := $001000
+ACC_ANNOTATION?            := $002000
+ACC_ENUM?                  := $004000
+ACC_CONSTRUCTOR?           := $010000
+ACC_DECLARED_SYNCHRONIZED? := $020000
+
+postpone
+    db DEX_FILE_MAGIC?
+end postpone
 
