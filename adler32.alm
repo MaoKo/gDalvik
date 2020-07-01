@@ -1,10 +1,20 @@
 
-calminstruction (return?) adler32? virtual?*, size?*
+calminstruction (return?) adler32? virtual?*, size?, base?
         local       data, A, B, index, result
         declconst   _data, data
         declconst   modulo, $FFF1
         compute     A, $01
         compute     B, $00
+        asmcmd      invoke, =virtual virtual
+        match       ,size
+        jno         next
+        compute     size, ($ - $$)
+    next:
+        match       ,base
+        jno         close
+        compute     base, ($$)
+    close:
+        execasm     end virtual
         compute     index, $00
         compute     size, size
     loop:
@@ -14,9 +24,9 @@ calminstruction (return?) adler32? virtual?*, size?*
         publish     return, result
         exit
     load:
-        asmcmd      invoke, =load _data:=byte =from virtual:index
-        compute     A, (A + data) mod modulo
-        compute     B, (B + A) mod modulo
+        asmcmd      invoke, =load _data:=byte =from virtual:((base) + index)
+        compute     A, ((A + data) mod modulo)
+        compute     B, ((B + A) mod modulo)
         compute     index, (index + $01)
         jump        loop
 end calminstruction

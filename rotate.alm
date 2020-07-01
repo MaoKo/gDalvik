@@ -1,6 +1,6 @@
 
 calminstruction (return?) rotate? size?*, expression?*, amount?*
-        local       target, select, bitmask, right
+        local       target, select, bitmask, right, offset
         compute     expression, expression
         compute     size, size
         check       (size < $00)
@@ -16,14 +16,15 @@ calminstruction (return?) rotate? size?*, expression?*, amount?*
         compute     amount, (amount mod size)
         check       (~amount)
         jyes        leave
+        compute     offset, (size - amount)
         check       (right)
         jyes        right
-        compute     bitmask, ((((($01 shl amount) - $01) shl amount) and expression) shr amount)
+        compute     bitmask, ((((($01 shl amount) - $01) shl offset) and expression) shr offset)
         compute     target, (((expression shl amount) and select) or bitmask)
         jump        insert
     right:
         compute     bitmask, ((($01 shl amount) - $01) and expression)
-        compute     target, (((expression and select) shr amount) or (bitmask shl amount))
+        compute     target, (((expression and select) shr amount) or (bitmask shl offset))
     insert:
         compute     select, (not select)
         compute     expression, ((expression and select) or target)
@@ -55,3 +56,4 @@ iterate <instruction?*>,ror,rol
         purge calminstruction?.builder?
     end repeat
 end iterate
+

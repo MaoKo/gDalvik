@@ -8,14 +8,19 @@ calminstruction calminstruction?.initvar? target?*, value?:$00
         publish     target, value
 end calminstruction
 
+__unique? := $00
+namespace __unique?
+    count? =: $00
+end namespace
+
 redefine __prefix? __
 match _, __prefix
     iterate <prefix?>,,calminstruction?.
         calminstruction prefix#unique? target?*
-                local       count, build
-                initvar     count
-                arrange     build, =_#target#count
-                compute     count, count + $01
+                local       proxy, build
+                compute     proxy, __unique?.count?
+                arrange     build, =_#target#proxy
+                compute     __unique?.count?, (proxy + $01)
                 publish     target, build
         end calminstruction
     end iterate

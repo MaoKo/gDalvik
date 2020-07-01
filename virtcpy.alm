@@ -1,0 +1,28 @@
+
+calminstruction (return?) virtcpy? virtual?*, size?, base?, newbase?
+        local       random, data
+        declconst   _data, data
+        execasm     unique random
+        asmcmd      invoke, =virtual virtual
+        match       ,size
+        jno         next
+        compute     size, ($ - $$)
+    next:
+        match       ,base
+        jno         load
+        compute     base, ($$)
+    load:
+        asmcmd      invoke, =load _data : size =from base
+        match       ,newbase
+        jno         start
+        compute     newbase, (base)
+    start:
+        execasm     end virtual
+        asmcmd      invoke, =virtual =at newbase
+        asmcmd      invoke, random::
+        asmcmd      invoke, =db _data
+        asmcmd      invoke, random.=size? :== size
+        asmcmd      invoke, random.=base? :== base
+        execasm     end virtual
+        publish     return, random
+end calminstruction
