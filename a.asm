@@ -4,9 +4,12 @@ include "gdalvik.inc"
 virtual at $00
 _test::
     ;db "The quick brown fox jumps over the lazy cog"
-    db "A"
+    db "ABAA"
     _test._len = $
 end virtual
 
+repeat $1
 _ sha1 _test
-dd _
+end repeat
+
+emit $14 : _

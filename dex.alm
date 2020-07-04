@@ -33,6 +33,7 @@ macro string_ids?
     end struc
 end macro
 
+macro _i?
 postpone
     db DEX_FILE_MAGIC?
     dd $00 ; adler32 checksum
@@ -59,3 +60,4 @@ postpone
     dd $00 ; data_off
 end postpone
 
+end macro

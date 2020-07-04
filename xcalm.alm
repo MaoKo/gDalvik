@@ -41,3 +41,8 @@ calminstruction calminstruction?.execasm? instruction?&
         asmcmd      invoke, =assemble random
 end calminstruction
 
+iterate <operation?*,operator?*>, inc,+, dec,-
+    calminstruction calminstruction?.operation? target?*
+            asmcmd      invoke, =compute target, (target operator $01)
+    end calminstruction
+end iterate

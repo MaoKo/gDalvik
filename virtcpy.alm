@@ -1,28 +1,34 @@
 
-calminstruction (return?) virtcpy? virtual?*, size?, base?, newbase?
-        local       random, data
+macro calminstruction?.placeholder? target?*, value?*, expression?*, label?*
+        arrange     target,
+        match       target : value?, value
+        match       ,value
+        jno         label
+        compute     value, expression
+        match       ,target
+        jyes        label
+        publish     target, value
+    label:
+end macro
+
+calminstruction (return?) virtcpy? virtual?*, size?, base?, offset?
+        local       random, data, target
         declconst   _data, data
         execasm     unique random
         asmcmd      invoke, =virtual virtual
-        match       ,size
-        jno         next
-        compute     size, ($ - $$)
-    next:
-        match       ,base
-        jno         load
-        compute     base, ($$)
-    load:
+        placeholder target, size, ($ - $$), next
+        placeholder target, base,     ($$), load
         asmcmd      invoke, =load _data : size =from base
-        match       ,newbase
+        match       ,offset
         jno         start
-        compute     newbase, (base)
+        compute     offset, (base)
     start:
         execasm     end virtual
-        asmcmd      invoke, =virtual =at newbase
+        asmcmd      invoke, =virtual =at offset
         asmcmd      invoke, random::
-        asmcmd      invoke, =db _data
-        asmcmd      invoke, random.=size? :== size
-        asmcmd      invoke, random.=base? :== base
+        execasm     db data
         execasm     end virtual
         publish     return, random
 end calminstruction
+
+purge calminstruction?.placeholder?

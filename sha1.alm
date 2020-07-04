@@ -35,30 +35,28 @@ calminstruction (return?) sha1? virtual?*, size?, base?
         local       virtbck, data, chunk, index, temporary
         local       a, b, c, d, e, f, k
         local       h0, h1, h2, h3, h4
-        declconst   _data, data
+        declconst   max32, $FFFFFFFF
         declconst   _virtbck, virtbck
+        declconst   _data, data
+        declconst   _size, size
         compute     h0, $67452301
         compute     h1, $EFCDAB89
         compute     h2, $98BADCFE
         compute     h3, $10325476
         compute     h4, $C3D2E1F0
-        asmcmd      invoke, _virtbck =virtcpy virtual, size, base, $00
+        asmcmd      invoke, _virtbck =virtcpy virtual, _size:size, base, $00
         asmcmd      invoke, =virtual virtbck
         execasm     db $80
-    padding:
-        check       ((($*$08) mod $200) <> $1C0)
-        jno         continue
-        execasm     db $00
-        jump        padding
-    continue:
-        asmcmd      invoke, =dq (virtbck.=size? =bswap $08)
+        compute     temporary, (($40 - (($ + $08) mod $40)) mod $40)
+        execasm     emit temporary: $00
+        execasm     dq ((size * $08) bswap $08)
         compute     size, ($)
         execasm     end virtual
         compute     chunk, $00
     loop:
         check       (chunk < size)
         jyes        load
-        compute     temporary, ((h4)); or (h3 shl $20) or (h2 shl $40) or (h1 shl $60) or (h0 shl $80))
+        compute     temporary, ((h4) or (h3 shl $20) or (h2 shl $40) or (h1 shl $60) or (h0 shl $80))
         publish     return, temporary
         exit
     load:
@@ -67,8 +65,9 @@ calminstruction (return?) sha1? virtual?*, size?, base?
     nested_1:
         check       (index < $10)
         jno         next_1
-        asmcmd      invoke, =store ((_data =shl ($20 * index)) =and $FFFFFFFF) : =dword =at =__sha1?.=w#index:$00
-        compute     index, (index + $01)
+        compute     temporary, +(((data shr ($20 * index)) and max32) bswap $04)
+        asmcmd      invoke, =store (temporary) : =dword =at =__sha1?.=w#index:$00
+        inc         index
         jump        nested_1
     next_1:
         compute     index, $10
@@ -78,7 +77,7 @@ calminstruction (return?) sha1? virtual?*, size?, base?
         split       temporary, index, _data, data, $03, $08, $0E, $10
         execasm     temporary rol $20, temporary, $01
         asmcmd      invoke, =store (temporary) : =dword =at =__sha1?.=w#index:$00
-        compute     index, (index + $01)
+        inc         index
         jump        nested_2
     next_2:
         compute     a, h0
@@ -93,7 +92,7 @@ calminstruction (return?) sha1? virtual?*, size?, base?
     check_1:
         check       (index <= $13)
         jno         check_2
-        compute     f, (b and c) or (((not b) and $FFFFFFFF) and d)
+        compute     f, (b and c) or (((not b) and max32) and d)
         compute     k, $5A827999
         jump        update
     check_2:
@@ -113,21 +112,21 @@ calminstruction (return?) sha1? virtual?*, size?, base?
         compute     k, $CA62C1D6
     update:
         asmcmd      invoke, =load _data : =dword =from =__sha1?.=w#index:$00
-        compute     temporary, (f + e + k + data)
         execasm     temporary rol $20, a, $05
+        compute     temporary, ((temporary + f + e + k + data) and max32)
         compute     e, d
         compute     d, c
         execasm     c rol $20, b, $1E
         compute     b, a
         compute     a, temporary
-        compute     index, (index + $01)
+        inc         index
         jump        nested_3
     next_3:
-        compute     h0, (h0 + a)
-        compute     h1, (h1 + b)
-        compute     h2, (h2 + c)
-        compute     h3, (h3 + d)
-        compute     h4, (h4 + e)
+        compute     h0, ((h0 + a) and max32)
+        compute     h1, ((h1 + b) and max32)
+        compute     h2, ((h2 + c) and max32)
+        compute     h3, ((h3 + d) and max32)
+        compute     h4, ((h4 + e) and max32)
         compute     chunk, (chunk + $40)
         jump        loop
 end calminstruction
